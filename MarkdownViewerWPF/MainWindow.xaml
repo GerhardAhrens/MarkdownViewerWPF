@@ -1,0 +1,129 @@
+﻿<base:WindowBase
+    x:Class="MarkdownViewerWPF.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:base="clr-namespace:System.Windows"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:MarkdownViewerWPF"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="{Binding Path=WindowTitel, FallbackValue=~WindowTitel}"
+    Width="900"
+    Height="600"
+    Icon="{StaticResource ResourceKey=IconCustomA2}"
+    mc:Ignorable="d">
+
+    <Grid x:Name="gridMain">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="35" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="35" />
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Border BorderBrush="DarkGray" BorderThickness="0,0,0,2">
+            <StackPanel
+            Grid.Row="0"
+            Grid.Column="0"
+            Orientation="Horizontal">
+                <Button
+                Width="30"
+                Height="30"
+                HorizontalAlignment="Left"
+                Command="{Binding Path=QuitCommand}"
+                ToolTip="Close Application">
+                    <Image Source="{StaticResource ResourceKey=IconApplicationExit2}" Stretch="None" />
+                </Button>
+
+                <Button
+                Width="30"
+                Height="30"
+                Margin="5,0,0,0"
+                HorizontalAlignment="Left"
+                Command="{Binding Path=QuitParamCommand}"
+                ToolTip="Close Application with Argument">
+                    <Image Source="{StaticResource ResourceKey=IconApplicationExit3}" Stretch="None" />
+                </Button>
+
+                <Button
+                Width="30"
+                Height="30"
+                Margin="5,0,0,0"
+                HorizontalAlignment="Left"
+                Command="{Binding Path=StartCommand}"
+                ToolTip="Click ausführen">
+                    <Image Source="{StaticResource ResourceKey=IconCustom}" Stretch="None" />
+                </Button>
+            </StackPanel>
+        </Border>
+
+        <TextBlock
+            Grid.Row="1"
+            Grid.Column="0"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            FontSize="24"
+            Text="Minimal WPF Template" />
+
+        <!--#region Statuszeile-->
+        <StatusBar
+            Grid.Row="2"
+            Height="Auto"
+            Background="Transparent"
+            BorderBrush="DarkGray"
+            BorderThickness="2"
+            DataContext="StatusMain"
+            FontSize="13">
+
+            <StatusBarItem DockPanel.Dock="Left">
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="{StaticResource ResourceKey=IconStatusbarUser}" />
+                    <TextBlock
+                        Margin="5,0,0,0"
+                        VerticalAlignment="Center"
+                        Text="{Binding Path=CurrentUser, Source={x:Static base:StatusbarMain.Statusbar}}" />
+                </StackPanel>
+            </StatusBarItem>
+
+            <Separator Background="DarkGray" />
+
+            <StatusBarItem DockPanel.Dock="Left" ToolTip="{Binding Path=DatabaseInfoTooltip, Source={x:Static base:StatusbarMain.Statusbar}}">
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="{StaticResource ResourceKey=IconStatusbarDatabase}" />
+
+                    <TextBlock
+                        Margin="5,0,0,0"
+                        VerticalAlignment="Center"
+                        Text="{Binding Path=DatabaseInfo, Source={x:Static base:StatusbarMain.Statusbar}}" />
+                </StackPanel>
+            </StatusBarItem>
+
+            <StatusBarItem DockPanel.Dock="Right">
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="{StaticResource ResourceKey=IconStatusbarCalendar}" />
+                    <TextBlock
+                        x:Name="dtStatusBarDate"
+                        Margin="5,0,0,0"
+                        VerticalAlignment="Center"
+                        Text="{Binding Path=CurrentDate, Source={x:Static base:StatusbarMain.Statusbar}}" />
+                </StackPanel>
+            </StatusBarItem>
+
+            <Separator Background="DarkGray" />
+
+            <StatusBarItem DockPanel.Dock="Left">
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="{StaticResource ResourceKey=IconStatusbarNotification}" />
+                    <TextBlock
+                        Margin="5,0,0,0"
+                        VerticalAlignment="Center"
+                        Text="{Binding Path=Notification, Source={x:Static base:StatusbarMain.Statusbar}}" />
+                </StackPanel>
+            </StatusBarItem>
+
+        </StatusBar>
+        <!--#endregion Statuszeile-->
+    </Grid>
+</base:WindowBase>
