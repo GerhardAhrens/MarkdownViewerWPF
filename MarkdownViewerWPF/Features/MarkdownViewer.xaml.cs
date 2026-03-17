@@ -1,6 +1,7 @@
 ﻿namespace System.Windows.Documents
 {
     using System.Diagnostics;
+    using System.Globalization;
     using System.IO;
     using System.Text.RegularExpressions;
     using System.Windows;
@@ -8,6 +9,7 @@
     using System.Windows.Input;
     using System.Windows.Media;
     using System.Windows.Media.Imaging;
+    using System.Windows.Media.Media3D;
     using System.Windows.Navigation;
 
     /// <summary>
@@ -74,6 +76,8 @@
 
     public static class MarkdownParser
     {
+        public static string BasePath { get; set; }
+
         public static FlowDocument Parse(string markdown)
         {
             FlowDocument doc = new FlowDocument();
@@ -231,18 +235,30 @@
                 }
                 else if (token.StartsWith("![", StringComparison.CurrentCultureIgnoreCase) == true)
                 {
-                    var m = Regex.Match(token, @"!\[(.*?)\]\((.*?)\)");
+                    var m = Regex.Match(token, @"!\[(.*?)\]\((.*?)(?:\s*=\s*(\d*)x(\d*))?\)");
 
                     string alt = m.Groups[1].Value;
                     string url = m.Groups[2].Value;
+                    string width = m.Groups[3].Value == string.Empty ? "32" : m.Groups[3].Value;
+                    string height = m.Groups[4].Value == string.Empty ? "32" : m.Groups[4].Value;
 
-                    Image img = new Image
+                    try
                     {
-                        Source = new BitmapImage(new Uri(url, UriKind.RelativeOrAbsolute)),
-                        Height = 16
-                    };
+                        Image image = new Image
+                        {
+                            Source = new BitmapImage(new Uri(url, UriKind.RelativeOrAbsolute)),
+                            Width = Convert.ToDouble(width, CultureInfo.CurrentCulture),
+                            Height = Convert.ToDouble(height, CultureInfo.CurrentCulture),
+                            Margin = new Thickness(4)
+                        };
 
-                    span.Inlines.Add(new InlineUIContainer(img));
+                        span.Inlines.Add(new InlineUIContainer(image));
+                    }
+                    catch
+                    {
+                        // Fallback wenn Bild nicht geladen werden kann
+                        span.Inlines.Add(new Run($"[Image: {alt}]"));
+                    }
                 }
                 else if (token.StartsWith("[", StringComparison.CurrentCultureIgnoreCase) == true)
                 {
