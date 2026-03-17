@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:base="clr-namespace:System.Windows"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:doc="clr-namespace:System.Windows.Documents"
     xmlns:local="clr-namespace:MarkdownViewerWPF"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="{Binding Path=WindowTitel, FallbackValue=~WindowTitel}"
@@ -25,47 +26,41 @@
 
         <Border BorderBrush="DarkGray" BorderThickness="0,0,0,2">
             <StackPanel
-            Grid.Row="0"
-            Grid.Column="0"
-            Orientation="Horizontal">
+                Grid.Row="0"
+                Grid.Column="0"
+                Orientation="Horizontal">
                 <Button
-                Width="30"
-                Height="30"
-                HorizontalAlignment="Left"
-                Command="{Binding Path=QuitCommand}"
-                ToolTip="Close Application">
+                    Width="30"
+                    Height="30"
+                    HorizontalAlignment="Left"
+                    Command="{Binding Path=QuitCommand}"
+                    ToolTip="Close Application">
                     <Image Source="{StaticResource ResourceKey=IconApplicationExit2}" Stretch="None" />
                 </Button>
 
                 <Button
-                Width="30"
-                Height="30"
-                Margin="5,0,0,0"
-                HorizontalAlignment="Left"
-                Command="{Binding Path=QuitParamCommand}"
-                ToolTip="Close Application with Argument">
+                    Width="30"
+                    Height="30"
+                    Margin="5,0,0,0"
+                    HorizontalAlignment="Left"
+                    Command="{Binding Path=QuitParamCommand}"
+                    ToolTip="Close Application with Argument">
                     <Image Source="{StaticResource ResourceKey=IconApplicationExit3}" Stretch="None" />
                 </Button>
 
                 <Button
-                Width="30"
-                Height="30"
-                Margin="5,0,0,0"
-                HorizontalAlignment="Left"
-                Command="{Binding Path=StartCommand}"
-                ToolTip="Click ausführen">
+                    Width="30"
+                    Height="30"
+                    Margin="5,0,0,0"
+                    HorizontalAlignment="Left"
+                    Command="{Binding Path=StartCommand}"
+                    ToolTip="Click ausführen">
                     <Image Source="{StaticResource ResourceKey=IconCustom}" Stretch="None" />
                 </Button>
             </StackPanel>
         </Border>
 
-        <TextBlock
-            Grid.Row="1"
-            Grid.Column="0"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            FontSize="24"
-            Text="Minimal WPF Template" />
+        <doc:MarkdownViewer x:Name="markdownViewer" Grid.Row="1" />
 
         <!--#region Statuszeile-->
         <StatusBar

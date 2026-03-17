@@ -52,6 +52,9 @@ namespace MarkdownViewerWPF
             StatusbarMain.Statusbar.DatabaseInfo = "Keine";
             StatusbarMain.Statusbar.DatabaseInfoTooltip = "Keine Datenbank verbunden";
             StatusbarMain.Statusbar.Notification = "Bereit";
+
+            //this.markdownViewer.MarkdownText = $"# Titel\n## Abschnitt\nText mit **Bold** und *Italic*\nText mit ***Bold und Italic***\n- Item 1\n- Item 2\n\nInline Code `var x = 5;`\n[GoogleWeb](https://google.com)";
+            this.markdownViewer.MarkdownText = $"# Titel\n| Name | Alter | Beruf |\n|------|------:|------|\n| Anna | 28 | Entwickler |\n| Max | 35 | Designer |\nNormaler Text mit **Bold** und *Italic*.";
         }
 
         private void OnCloseApplication(object sender, RoutedEventArgs e)
