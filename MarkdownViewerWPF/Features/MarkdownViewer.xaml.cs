@@ -20,12 +20,12 @@
         {
             this.InitializeComponent();
 
-            PART_RichText.IsReadOnly = true;
-            PART_RichText.IsDocumentEnabled = true;
+            this.PART_RichText.IsReadOnly = true;
+            this.PART_RichText.IsDocumentEnabled = true;
 
-            PART_RichText.AddHandler(
+            this.PART_RichText.AddHandler(
                     Hyperlink.RequestNavigateEvent,
-                    new RequestNavigateEventHandler(Hyperlink_RequestNavigate));
+                    new RequestNavigateEventHandler(this.Hyperlink_RequestNavigate));
         }
 
         public static readonly DependencyProperty MarkdownTextProperty =
@@ -58,7 +58,7 @@
         private void RenderMarkdown(string markdown)
         {
             FlowDocument doc = MarkdownParser.Parse(markdown ?? "");
-            PART_RichText.Document = doc;
+            this.PART_RichText.Document = doc;
         }
 
         private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
@@ -239,8 +239,7 @@
         {
             Span span = new Span();
 
-            var matches = Regex.Matches(
-                text,
+            var matches = Regex.Matches(text,
                 @"`[^`]+`|\*\*\*[^*]+\*\*\*|\*\*[^*]+\*\*|\*[^*]+\*|!\[[^\]]*\]\([^\)]+\)|\[[^\]]+\]\([^\)]+\)|\\.|[^*`\[\\]+"
             );
 
@@ -271,6 +270,9 @@
                     string value = token.Substring(1, token.Length - 2);
 
                     span.Inlines.Add(new Italic(new Run(value)));
+                }
+                else if (token.StartsWith("<!--", StringComparison.CurrentCultureIgnoreCase) && token.EndsWith("-->", StringComparison.CurrentCultureIgnoreCase))
+                {
                 }
                 else if (token.StartsWith("`", StringComparison.CurrentCultureIgnoreCase) && token.EndsWith("`", StringComparison.CurrentCultureIgnoreCase))
                 {
@@ -368,81 +370,92 @@
             TableRowGroup group = new TableRowGroup();
             table.RowGroups.Add(group);
 
-            var headerCells = lines[0].Split('|', StringSplitOptions.RemoveEmptyEntries);
+            // ---------- Header analysieren ----------
+            var headerCells = lines[0]
+                .Split('|', StringSplitOptions.RemoveEmptyEntries)
+                .Select(c => c.Trim())
+                .ToArray();
+
             int columnCount = headerCells.Length;
 
-            for (int i = 0; i < columnCount; i++)
-            {
-                table.Columns.Add(new TableColumn());
-            }
-
-            // -------- Alignment bestimmen --------
+            // ---------- Alignment bestimmen ----------
             List<TextAlignment> alignments = new List<TextAlignment>();
 
-            if (lines.Count > 1 && Regex.IsMatch(lines[1], @"^\s*\|?[:\- ]+\|"))
+            if (lines.Count > 1)
             {
-                var alignCells = lines[1].Split('|', StringSplitOptions.RemoveEmptyEntries);
+                var alignCells = lines[1]
+                    .Split('|', StringSplitOptions.RemoveEmptyEntries);
 
                 foreach (var cell in alignCells)
                 {
                     string a = cell.Trim();
 
-                    if (a.StartsWith(":", StringComparison.CurrentCultureIgnoreCase) && a.EndsWith(":", StringComparison.CurrentCultureIgnoreCase))
-                    {
+                    if (a.StartsWith(":") && a.EndsWith(":"))
                         alignments.Add(TextAlignment.Center);
-                    }
-                    else if (a.EndsWith(":", StringComparison.CurrentCultureIgnoreCase))
-                    {
+                    else if (a.EndsWith(":"))
                         alignments.Add(TextAlignment.Right);
-                    }
                     else
-                    {
                         alignments.Add(TextAlignment.Left);
-                    }
-                }
-            }
-            else
-            {
-                for (int i = 0; i < columnCount; i++)
-                {
-                    alignments.Add(TextAlignment.Left);
                 }
             }
 
-            bool header = true;
+            while (alignments.Count < columnCount)
+                alignments.Add(TextAlignment.Left);
+
+            // ---------- Tabelleninhalte vorbereiten ----------
+            List<string[]> parsedRows = new List<string[]>();
 
             foreach (var line in lines)
             {
                 if (Regex.IsMatch(line, @"^\|\s*[:\-]+\s*(\|\s*[:\-]+\s*)*\|?$"))
-                {
                     continue;
-                }
 
-                var cells = line.Split('|', StringSplitOptions.RemoveEmptyEntries);
+                parsedRows.Add(
+                    line.Split('|', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(c => c.Trim())
+                        .ToArray()
+                );
+            }
 
+            // ---------- automatische Spaltenbreite ----------
+            double[] columnWidths = CalculateColumnWidths(parsedRows);
+
+            for (int i = 0; i < columnWidths.Length; i++)
+            {
+                table.Columns.Add(new TableColumn
+                {
+                    Width = new GridLength(columnWidths[i])
+                });
+            }
+
+            // ---------- Tabellenzeilen erstellen ----------
+            bool header = true;
+
+            foreach (var rowData in parsedRows)
+            {
                 TableRow row = new TableRow();
 
-                for (int i = 0; i < cells.Length; i++)
+                for (int i = 0; i < rowData.Length; i++)
                 {
-                    Paragraph paragraph = new Paragraph(ParseInline(cells[i].Trim()))
+                    Paragraph paragraph = new Paragraph(ParseInline(rowData[i]))
                     {
                         TextAlignment = alignments[Math.Min(i, alignments.Count - 1)]
                     };
 
-                    TableCell tableCell = new TableCell(paragraph)
+                    TableCell cell = new TableCell(paragraph)
                     {
                         BorderBrush = Brushes.Gray,
                         BorderThickness = new Thickness(0.5),
-                        Padding = new Thickness(5)
+                        Padding = new Thickness(6)
                     };
 
                     if (header)
                     {
                         paragraph.FontWeight = FontWeights.Bold;
-                        tableCell.Background = Brushes.LightGray;
+                        cell.Background = new SolidColorBrush(Color.FromRgb(240, 240, 240));
                     }
 
-                    row.Cells.Add(tableCell);
+                    row.Cells.Add(cell);
                 }
 
                 group.Rows.Add(row);
@@ -450,6 +463,39 @@
             }
 
             return table;
+        }
+
+        private static double MeasureTextWidth(string text)
+        {
+            var formattedText = new FormattedText(
+                text,
+                System.Globalization.CultureInfo.CurrentCulture,
+                FlowDirection.LeftToRight,
+                new Typeface("Segoe UI"),
+                14,
+                Brushes.Black,
+                VisualTreeHelper.GetDpi(new System.Windows.Controls.Control()).PixelsPerDip);
+
+            return formattedText.Width;
+        }
+
+        private static double[] CalculateColumnWidths(List<string[]> rows)
+        {
+            int columnCount = rows[0].Length;
+            double[] widths = new double[columnCount];
+
+            foreach (var row in rows)
+            {
+                for (int i = 0; i < columnCount; i++)
+                {
+                    double w = MeasureTextWidth(row[i]) + 20; // Padding
+
+                    if (w > widths[i])
+                        widths[i] = w;
+                }
+            }
+
+            return widths;
         }
 
         private static Section ParseQuote(List<string> lines)

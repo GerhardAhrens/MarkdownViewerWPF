@@ -56,8 +56,9 @@ namespace MarkdownViewerWPF
             string gruppeA = $"# Titel\n## Abschnitt\nText mit **Bold** und *Italic*\nText mit ***Bold und Italic***\n- Item 1\n- Item 2\n\nInline Code `var x = 5;`\n[GoogleWeb](https://google.com)";
             string gruppeB = $"# Titel\n| Name | Alter | Beruf |\n|------|------:|------|\n| Anna | 28 | Entwickler |\n| Max | 35 | Designer |\nNormaler Text mit **Bold** und *Italic*.\n![Logo](C:\\_Projekte\\_Git_Private\\MarkdownViewerWPF\\MarkdownViewerWPF\\Resources\\Picture\\_PreviewImage.png=64x64)";
             string gruppeC = $"- Bullet Lists1\n- Bullet Lists2\n\n1. Bullet Lists1\n2. Bullet Lists2\n";
-            string gruppeD = $"> Dies ist ein Zitat\r\n> über mehrere Zeilen\r\n> mit **Markdown**\n";
-            this.markdownViewer.MarkdownText = $"{gruppeA}\n\n{gruppeB}\n{gruppeC}\n{gruppeD}";
+            string gruppeD = $"> Dies ist ein Zitat\r\n> über mehrere Zeilen\r\n> mit **Markdown**";
+            string gruppeE = $"<!-- Dies ist ein ausgeblendeter Kommentar -->\nNormaler Text";
+            this.markdownViewer.MarkdownText = $"{gruppeA}\n\n{gruppeB}\n{gruppeC}\n{gruppeD}\n{gruppeE}";
         }
 
         private void OnCloseApplication(object sender, RoutedEventArgs e)
