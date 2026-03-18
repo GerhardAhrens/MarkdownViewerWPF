@@ -34,4 +34,10 @@
     <Folder Include="Resources\Style\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Resources\Picture\_PreviewImage.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

@@ -9,7 +9,6 @@
     using System.Windows.Input;
     using System.Windows.Media;
     using System.Windows.Media.Imaging;
-    using System.Windows.Media.Media3D;
     using System.Windows.Navigation;
 
     /// <summary>
@@ -76,6 +75,11 @@
 
     public static class MarkdownParser
     {
+        static MarkdownParser()
+        {
+            BasePath = AppDomain.CurrentDomain.BaseDirectory;
+        }
+
         public static string BasePath { get; set; }
 
         public static FlowDocument Parse(string markdown)
@@ -86,8 +90,12 @@
 
             bool tabelle = false;
             bool codeBlock = false;
+            bool numericListActive = false;
+            bool quoteActive = false;
             Paragraph codeParagraph = null;
             List<string> tableLines = new List<string>();
+            List numericList = new List {MarkerStyle = TextMarkerStyle.Decimal };
+            List<string> quoteLines = new List<string>();
 
             foreach (var line in lines)
             {
@@ -126,6 +134,7 @@
                 if (tabelle == true)
                 {
                     doc.Blocks.Add(ParseTable(tableLines));
+                    tableLines.Clear();
                     tabelle = false;
                 }
 
@@ -147,6 +156,24 @@
                     continue;
                 }
 
+                if (line.StartsWith(">", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    quoteActive = true;
+                    if (quoteActive == true)
+                    {
+                        quoteLines.Add(line.Substring(1).TrimStart());
+                    }
+
+                    continue;
+                }
+
+                if (quoteActive == true)
+                {
+                    doc.Blocks.Add(ParseQuote(quoteLines));
+                    quoteLines.Clear();
+                    quoteActive = false;
+                }
+
                 if (line.StartsWith("- ", StringComparison.CurrentCultureIgnoreCase) == true)
                 {
                     var list = new List();
@@ -157,6 +184,28 @@
 
                     doc.Blocks.Add(list);
                     continue;
+                }
+
+                /* Nummerische Aufzählung */
+                if (Regex.IsMatch(line, @"^\d+\.\s+"))
+                {
+                    numericListActive = true;
+
+                    if (numericListActive == true)
+                    {
+                        string itemText = Regex.Replace(line, @"^\d+\.\s+", "");
+                        ListItem item = new ListItem(new Paragraph(ParseInline(itemText)));
+                        numericList.ListItems.Add(item);
+                    }
+
+                    continue;
+                }
+
+                if (numericListActive == true)
+                {
+                    doc.Blocks.Add(numericList);
+                    numericList = null;
+                    numericListActive = false;
                 }
 
                 doc.Blocks.Add(new Paragraph(ParseInline(line)));
@@ -244,9 +293,16 @@
 
                     try
                     {
+                        string path = url;
+
+                        if (!Uri.IsWellFormedUriString(url, UriKind.RelativeOrAbsolute) && string.IsNullOrEmpty(BasePath) == false)
+                        {
+                            path = Path.GetRelativePath(BasePath, url);
+                        }
+
                         Image image = new Image
                         {
-                            Source = new BitmapImage(new Uri(url, UriKind.RelativeOrAbsolute)),
+                            Source = new BitmapImage(new Uri(path, UriKind.RelativeOrAbsolute)),
                             Width = Convert.ToDouble(width, CultureInfo.CurrentCulture),
                             Height = Convert.ToDouble(height, CultureInfo.CurrentCulture),
                             Margin = new Thickness(4)
@@ -297,7 +353,7 @@
         /// <returns></returns>
         private static bool IsTableRow(string line)
         {
-            return line.Contains('|', StringComparison.CurrentCultureIgnoreCase);
+            return Regex.IsMatch(line, @"^\s*\|.*\|\s*$");
         }
 
         private static Table ParseTable(List<string> lines)
@@ -394,6 +450,24 @@
             }
 
             return table;
+        }
+
+        private static Section ParseQuote(List<string> lines)
+        {
+            Section section = new Section
+            {
+                Margin = new Thickness(10, 4, 0, 4),
+                BorderBrush = Brushes.Gray,
+                BorderThickness = new Thickness(3, 0, 0, 0),
+                Padding = new Thickness(10, 2, 2, 2)
+            };
+
+            foreach (var line in lines)
+            {
+                section.Blocks.Add(new Paragraph(ParseInline(line)));
+            }
+
+            return section;
         }
     }
 }
