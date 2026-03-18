@@ -32,6 +32,7 @@ namespace MarkdownViewerWPF
             this.QuitCommand = new CommandBase(this.OnQuit);
             this.QuitParamCommand = new CommandBase(() => this.OnQuit("Argument"));
             this.StartCommand = new CommandBase(OnStart);
+            this.EditMarkdownCommand = new CommandBase(OnEditMarkdown);
 
             this.WindowTitel = "Minimal WPF Template";
             this.DataContext = this;
@@ -40,6 +41,7 @@ namespace MarkdownViewerWPF
         public CommandBase QuitCommand { get; private set; }
         public CommandBase QuitParamCommand { get; private set; }
         public CommandBase StartCommand { get; private set; }
+        public CommandBase EditMarkdownCommand { get; private set; }
 
         public string WindowTitel
         {
@@ -75,6 +77,10 @@ namespace MarkdownViewerWPF
         private void OnStart()
         {
             this.QuitParamCommand.TryExecute();
+        }
+
+        private void OnEditMarkdown()
+        {
         }
 
         private void OnQuit(string param)

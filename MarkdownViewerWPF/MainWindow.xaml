@@ -57,6 +57,16 @@
                     ToolTip="Click ausführen">
                     <Image Source="{StaticResource ResourceKey=IconCustom}" Stretch="None" />
                 </Button>
+
+                <Button
+                    Width="30"
+                    Height="30"
+                    Margin="5,0,0,0"
+                    HorizontalAlignment="Left"
+                    Command="{Binding Path=EditMarkdownCommand}"
+                    ToolTip="Markdown Datei bearbeiten">
+                    <Image Source="{StaticResource ResourceKey=IconEditMarkdown}" Stretch="None" />
+                </Button>
             </StackPanel>
         </Border>
 
