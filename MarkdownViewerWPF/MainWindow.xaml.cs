@@ -60,7 +60,8 @@ namespace MarkdownViewerWPF
             string gruppeC = $"- Bullet Lists1\n- Bullet Lists2\n\n1. Bullet Lists1\n2. Bullet Lists2\n";
             string gruppeD = $"> Dies ist ein Zitat\r\n> über mehrere Zeilen\r\n> mit **Markdown**";
             string gruppeE = $"<!-- Dies ist ein ausgeblendeter Kommentar -->\nNormaler Text";
-            this.markdownViewer.MarkdownText = $"{gruppeA}\n\n{gruppeB}\n{gruppeC}\n{gruppeD}\n{gruppeE}";
+            string gruppeF = $"Codeblock\n```\nvar x = 5;\n```";
+            this.markdownViewer.MarkdownText = $"{gruppeA}\n\n{gruppeB}\n{gruppeC}\n{gruppeD}\n{gruppeE}\n{gruppeF}\n";
         }
 
         private void OnCloseApplication(object sender, RoutedEventArgs e)
