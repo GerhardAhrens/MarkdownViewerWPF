@@ -8,78 +8,83 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
+    <Border
+        Margin="5"
+        BorderBrush="Gray"
+        BorderThickness="1">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="50" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="50" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
 
-            <!--  Line Numbers  -->
-            <Canvas
-                x:Name="LineNumberCanvas"
-                Grid.Column="0"
-                Background="#F5F5F5"
-                ClipToBounds="True" />
+                <!--  Line Numbers  -->
+                <Canvas
+                    x:Name="LineNumberCanvas"
+                    Grid.Column="0"
+                    Background="#F5F5F5"
+                    ClipToBounds="True" />
 
-            <!--  Text Editor  -->
-            <!--  Current Line Highlight  -->
-            <Rectangle
-                x:Name="CurrentLineHighlight"
-                Height="20"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Top"
-                Fill="#20A0C5FF"
-                IsHitTestVisible="False" />
+                <!--  Text Editor  -->
+                <!--  Current Line Highlight  -->
+                <Rectangle
+                    x:Name="CurrentLineHighlight"
+                    Height="20"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Top"
+                    Fill="#20A0C5FF"
+                    IsHitTestVisible="False" />
 
-            <TextBox
-                x:Name="Editor"
-                Grid.Column="1"
-                Padding="3"
-                AcceptsReturn="True"
-                AcceptsTab="True"
-                FontFamily="Consolas"
-                FontSize="14"
-                HorizontalScrollBarVisibility="Auto"
-                Loaded="Editor_Loaded"
-                SelectionChanged="Editor_SelectionChanged"
-                TextChanged="Editor_TextChanged"
-                VerticalScrollBarVisibility="Auto" />
+                <TextBox
+                    x:Name="Editor"
+                    Grid.Column="1"
+                    Padding="3"
+                    AcceptsReturn="True"
+                    AcceptsTab="True"
+                    FontFamily="Consolas"
+                    FontSize="14"
+                    HorizontalScrollBarVisibility="Auto"
+                    Loaded="Editor_Loaded"
+                    SelectionChanged="Editor_SelectionChanged"
+                    TextChanged="Editor_TextChanged"
+                    VerticalScrollBarVisibility="Auto" />
+            </Grid>
+
+            <!--  StatusBar  -->
+            <StatusBar Grid.Row="1">
+                <StatusBarItem>
+                    <TextBlock Text="  " />
+                </StatusBarItem>
+
+                <StatusBarItem>
+                    <TextBlock x:Name="StatusCursor" />
+                </StatusBarItem>
+
+                <Separator />
+
+                <StatusBarItem>
+                    <TextBlock x:Name="StatusLines" />
+                </StatusBarItem>
+
+                <Separator />
+
+                <StatusBarItem>
+                    <TextBlock x:Name="StatusSelection" />
+                </StatusBarItem>
+
+                <Separator />
+
+                <StatusBarItem>
+                    <TextBlock x:Name="StatusUtf" />
+                </StatusBarItem>
+
+            </StatusBar>
         </Grid>
-
-        <!--  StatusBar  -->
-        <StatusBar Grid.Row="1">
-            <StatusBarItem>
-                <TextBlock Text="  " />
-            </StatusBarItem>
-
-            <StatusBarItem>
-                <TextBlock x:Name="StatusCursor" />
-            </StatusBarItem>
-
-            <Separator />
-
-            <StatusBarItem>
-                <TextBlock x:Name="StatusLines" />
-            </StatusBarItem>
-
-            <Separator />
-
-            <StatusBarItem>
-                <TextBlock x:Name="StatusSelection" />
-            </StatusBarItem>
-
-            <Separator />
-
-            <StatusBarItem>
-                <TextBlock x:Name="StatusUtf" />
-            </StatusBarItem>
-
-        </StatusBar>
-    </Grid>
+    </Border>
 </UserControl>

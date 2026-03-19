@@ -11,6 +11,7 @@
     public partial class MarkdownEditor : UserControl
     {
         private ScrollViewer editorScrollViewer;
+        private double lineHeight;
 
         public MarkdownEditor()
         {
@@ -24,9 +25,13 @@
             if (editorScrollViewer != null)
                 editorScrollViewer.ScrollChanged += EditorScrollChanged;
 
+            lineHeight = Editor.GetRectFromCharacterIndex(0).Height;
+
+            if (lineHeight <= 0)
+                lineHeight = Editor.FontSize * 1.4;
+
             UpdateEditorVisuals();
         }
-
         private void Editor_TextChanged(object sender, TextChangedEventArgs e)
         {
             UpdateEditorVisuals();
@@ -39,9 +44,6 @@
 
         private void EditorScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            LineNumberCanvas.RenderTransform =
-                new TranslateTransform(0, -e.VerticalOffset);
-
             UpdateLineNumbers();
         }
 
@@ -69,34 +71,21 @@
 
         private void UpdateLineNumbers()
         {
-            if (editorScrollViewer == null)
+            if (editorScrollViewer == null || lineHeight <= 0)
                 return;
 
             LineNumberCanvas.Children.Clear();
 
-            double verticalOffset = editorScrollViewer.VerticalOffset;
-            double viewportHeight = editorScrollViewer.ViewportHeight;
+            double offset = editorScrollViewer.VerticalOffset;
+            double viewport = editorScrollViewer.ViewportHeight;
 
-            int firstLine = Editor.GetLineIndexFromCharacterIndex(
-                Editor.GetCharacterIndexFromPoint(new Point(0, verticalOffset), true));
+            int firstLine = (int)(offset / lineHeight);
+            int visibleLines = (int)(viewport / lineHeight) + 2;
 
-            if (firstLine < 0)
-                firstLine = 0;
+            int lastLine = Math.Min(Editor.LineCount, firstLine + visibleLines);
 
-            int lineCount = Editor.LineCount;
-
-            for (int i = firstLine; i < lineCount; i++)
+            for (int i = firstLine; i < lastLine; i++)
             {
-                int charIndex = Editor.GetCharacterIndexFromLineIndex(i);
-
-                Rect rect = Editor.GetRectFromCharacterIndex(charIndex);
-
-                if (rect.IsEmpty)
-                    continue;
-
-                if (rect.Top > viewportHeight)
-                    break;
-
                 TextBlock tb = new TextBlock
                 {
                     Text = (i + 1).ToString(),
@@ -105,11 +94,26 @@
                     Foreground = Brushes.Gray
                 };
 
-                Canvas.SetTop(tb, rect.Top - editorScrollViewer.VerticalOffset);
+                double y = (i * lineHeight) - offset;
+
+                Canvas.SetTop(tb, y);
                 Canvas.SetRight(tb, 5);
 
                 LineNumberCanvas.Children.Add(tb);
             }
+        }
+
+        private void UpdateCurrentLineHighlight()
+        {
+            if (editorScrollViewer == null)
+                return;
+
+            int line = Editor.GetLineIndexFromCharacterIndex(Editor.CaretIndex);
+
+            double y = line * lineHeight - editorScrollViewer.VerticalOffset;
+
+            CurrentLineHighlight.Height = lineHeight;
+            CurrentLineHighlight.Margin = new Thickness(0, y, 0, 0);
         }
 
 
@@ -129,29 +133,11 @@
             return null;
         }
 
-        private void UpdateCurrentLineHighlight()
-        {
-            int caret = Editor.CaretIndex;
-
-            Rect rect = Editor.GetRectFromCharacterIndex(caret);
-
-            if (rect == Rect.Empty)
-                return;
-
-            CurrentLineHighlight.Height = rect.Height;
-
-            CurrentLineHighlight.Margin = new Thickness(
-                0,
-                rect.Top - editorScrollViewer.VerticalOffset,
-                0,
-                0);
-        }
-
         private void UpdateEditorVisuals()
         {
-            UpdateStatus();
             UpdateCurrentLineHighlight();
             UpdateLineNumbers();
+            UpdateStatus();
         }
     }
 }
