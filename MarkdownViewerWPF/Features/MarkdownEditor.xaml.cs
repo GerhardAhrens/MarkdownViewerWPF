@@ -220,7 +220,9 @@
             int length = Editor.SelectionLength;
 
             if (length == 0)
+            {
                 return;
+            }
 
             string selectedText = Editor.SelectedText;
 
