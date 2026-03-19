@@ -1,8 +1,10 @@
 ﻿namespace System.Windows.Documents
 {
+    using System.Globalization;
     using System.Text;
     using System.Windows;
     using System.Windows.Controls;
+    using System.Windows.Input;
     using System.Windows.Media;
 
     /// <summary>
@@ -16,35 +18,47 @@
         public MarkdownEditor()
         {
             this.InitializeComponent();
+
+            InputBindings.Add(new KeyBinding(
+                        new EditorRelayCommand(o => InsertCurrentDate(),null),
+                        new KeyGesture(Key.D, ModifierKeys.Control)));
+
+            InputBindings.Add(new KeyBinding(
+                        new EditorRelayCommand(o => WrapSelection("*"),null),
+                        new KeyGesture(Key.F, ModifierKeys.Control)));
         }
 
         private void Editor_Loaded(object sender, RoutedEventArgs e)
         {
-            editorScrollViewer = FindScrollViewer(Editor);
+            this.editorScrollViewer = FindScrollViewer(Editor);
 
-            if (editorScrollViewer != null)
-                editorScrollViewer.ScrollChanged += EditorScrollChanged;
+            if (this.editorScrollViewer != null)
+            {
+                this.editorScrollViewer.ScrollChanged += EditorScrollChanged;
+            }
 
-            lineHeight = Editor.GetRectFromCharacterIndex(0).Height;
+            this.lineHeight = Editor.GetRectFromCharacterIndex(0).Height;
 
-            if (lineHeight <= 0)
-                lineHeight = Editor.FontSize * 1.4;
+            if (this.lineHeight <= 0)
+            {
+                this.lineHeight = Editor.FontSize * 1.4;
+            }
 
-            UpdateEditorVisuals();
+            this.UpdateEditorVisuals();
         }
         private void Editor_TextChanged(object sender, TextChangedEventArgs e)
         {
-            UpdateEditorVisuals();
+            this.UpdateEditorVisuals();
         }
 
         private void Editor_SelectionChanged(object sender, RoutedEventArgs e)
         {
-            UpdateEditorVisuals();
+            this.UpdateEditorVisuals();
         }
 
         private void EditorScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            UpdateLineNumbers();
+            this.UpdateLineNumbers();
         }
 
         private void UpdateStatus()
@@ -54,27 +68,29 @@
             int line = Editor.GetLineIndexFromCharacterIndex(caret);
             int column = caret - Editor.GetCharacterIndexFromLineIndex(line);
 
-            StatusCursor.Text = $"Ln {line + 1}, Col {column + 1}";
+            this.StatusCursor.Text = $"Ln {line + 1}, Col {column + 1}";
 
             int totalLines = Editor.LineCount;
-            StatusLines.Text = $"Lines: {totalLines}";
+            this.StatusLines.Text = $"Lines: {totalLines}";
 
             int selection = Editor.SelectionLength;
-            StatusSelection.Text = $"Sel: {selection}";
+            this.StatusSelection.Text = $"Sel: {selection}";
 
             int utfPos = caret;
 
-            int bytePos = Encoding.UTF8.GetByteCount(Editor.Text.Substring(0, caret));
+            int bytePos = Encoding.UTF8.GetByteCount(Editor.Text.AsSpan(0, caret));
 
-            StatusUtf.Text = $"UTF: {utfPos}  Bytes: {bytePos}";
+            this.StatusUtf.Text = $"UTF: {utfPos}  Bytes: {bytePos}";
         }
 
         private void UpdateLineNumbers()
         {
-            if (editorScrollViewer == null || lineHeight <= 0)
+            if (this.editorScrollViewer == null || lineHeight <= 0)
+            {
                 return;
+            }
 
-            LineNumberCanvas.Children.Clear();
+            this.LineNumberCanvas.Children.Clear();
 
             double offset = editorScrollViewer.VerticalOffset;
             double viewport = editorScrollViewer.ViewportHeight;
@@ -88,10 +104,7 @@
             {
                 TextBlock tb = new TextBlock
                 {
-                    Text = (i + 1).ToString(),
-                    FontFamily = Editor.FontFamily,
-                    FontSize = Editor.FontSize,
-                    Foreground = Brushes.Gray
+                    Text = (i + 1).ToString(CultureInfo.CurrentCulture), FontFamily = Editor.FontFamily, FontSize = Editor.FontSize, Foreground = Brushes.Gray
                 };
 
                 double y = (i * lineHeight) - offset;
@@ -99,35 +112,41 @@
                 Canvas.SetTop(tb, y);
                 Canvas.SetRight(tb, 5);
 
-                LineNumberCanvas.Children.Add(tb);
+                this.LineNumberCanvas.Children.Add(tb);
             }
         }
 
         private void UpdateCurrentLineHighlight()
         {
-            if (editorScrollViewer == null)
+            if (this.editorScrollViewer == null)
+            {
                 return;
+            }
 
-            int line = Editor.GetLineIndexFromCharacterIndex(Editor.CaretIndex);
+            int line = this.Editor.GetLineIndexFromCharacterIndex(Editor.CaretIndex);
 
-            double y = line * lineHeight - editorScrollViewer.VerticalOffset;
+            double y = line * this.lineHeight - this.editorScrollViewer.VerticalOffset;
 
-            CurrentLineHighlight.Height = lineHeight;
-            CurrentLineHighlight.Margin = new Thickness(0, y, 0, 0);
+            this.CurrentLineHighlight.Height = this.lineHeight;
+            this.CurrentLineHighlight.Margin = new Thickness(0, y, 0, 0);
         }
 
 
         private static ScrollViewer FindScrollViewer(DependencyObject d)
         {
             if (d is ScrollViewer)
+            {
                 return (ScrollViewer)d;
+            }
 
             for (int i = 0; i < VisualTreeHelper.GetChildrenCount(d); i++)
             {
                 var child = VisualTreeHelper.GetChild(d, i);
                 var result = FindScrollViewer(child);
                 if (result != null)
+                {
                     return result;
+                }
             }
 
             return null;
@@ -135,9 +154,113 @@
 
         private void UpdateEditorVisuals()
         {
-            UpdateCurrentLineHighlight();
-            UpdateLineNumbers();
-            UpdateStatus();
+            this.UpdateCurrentLineHighlight();
+            this.UpdateLineNumbers();
+            this.UpdateStatus();
+        }
+
+        #region Text per Doppelklick markieren
+        private void Editor_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            int caret = Editor.CaretIndex;
+
+            if (caret >= Editor.Text.Length)
+                return;
+
+            string text = Editor.Text;
+
+            if (char.IsWhiteSpace(text[caret]))
+                return;
+
+            int start = caret;
+            int end = caret;
+
+            while (start > 0 && !char.IsWhiteSpace(text[start - 1]))
+                start--;
+
+            while (end < text.Length && !char.IsWhiteSpace(text[end]))
+                end++;
+
+            Editor.SelectionStart = start;
+            Editor.SelectionLength = end - start;
+
+            e.Handled = true;
+        }
+        #endregion Text per Doppelklick markieren
+
+        #region Bereich für Kontextmenü
+        private void InsertCurrentDate_Click(object sender, RoutedEventArgs e)
+        {
+            this.InsertCurrentDate();
+        }
+        private void InsertCurrentDate()
+        {
+            string dateText = DateTime.Now.ToString("dd.MM.yyyy",CultureInfo.CurrentCulture);
+
+            int caret = Editor.CaretIndex;
+
+            if (Editor.SelectionLength > 0)
+            {
+                caret = Editor.SelectionStart;
+                Editor.Text = Editor.Text.Remove(Editor.SelectionStart, Editor.SelectionLength);
+            }
+
+            Editor.Text = Editor.Text.Insert(caret, dateText);
+            Editor.CaretIndex = caret + dateText.Length;
+        }
+
+        private void WrapWithStar_Click(object sender, RoutedEventArgs e)
+        {
+            WrapSelection("*");
+        }
+
+        private void WrapSelection(string wrapper)
+        {
+            int start = Editor.SelectionStart;
+            int length = Editor.SelectionLength;
+
+            if (length == 0)
+                return;
+
+            string selectedText = Editor.SelectedText;
+
+            string newText = wrapper + selectedText + wrapper;
+
+            Editor.Text = Editor.Text.Remove(start, length);
+            Editor.Text = Editor.Text.Insert(start, newText);
+
+            Editor.SelectionStart = start;
+            Editor.SelectionLength = newText.Length;
+        }
+        #endregion Bereich für Kontextmenü
+    }
+
+    public class EditorRelayCommand : ICommand
+    {
+        private readonly Action<object> execute;
+        private readonly Predicate<object> canExecute;
+
+        public EditorRelayCommand(Action<object> execute, Predicate<object> canExecute = null)
+        {
+            this.execute = execute;
+            this.canExecute = canExecute;
+        }
+
+        public bool CanExecute(object parameter)
+        {
+            return canExecute == null || canExecute(parameter);
+        }
+
+        // Weiterleitung an CommandManager verhindert CS0067 und ermöglicht automatische Requery
+        public event EventHandler CanExecuteChanged
+        {
+            add { CommandManager.RequerySuggested += value; }
+            remove { CommandManager.RequerySuggested -= value; }
+        }
+
+        public void Execute(object parameter)
+        {
+            execute(parameter);
         }
     }
 }

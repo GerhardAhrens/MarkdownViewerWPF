@@ -51,9 +51,32 @@
                     FontSize="14"
                     HorizontalScrollBarVisibility="Auto"
                     Loaded="Editor_Loaded"
+                     MouseDoubleClick="Editor_MouseDoubleClick"
                     SelectionChanged="Editor_SelectionChanged"
                     TextChanged="Editor_TextChanged"
-                    VerticalScrollBarVisibility="Auto" />
+                    VerticalScrollBarVisibility="Auto">
+                    <TextBox.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Command="ApplicationCommands.Cut" Header="Ausschneiden" />
+                            <MenuItem Command="ApplicationCommands.Copy" Header="Kopieren" />
+                            <MenuItem Command="ApplicationCommands.Paste" Header="Einfügen" />
+
+                            <Separator />
+
+                            <MenuItem
+                                Click="InsertCurrentDate_Click"
+                                Header="Heutiges Datum einfügen"
+                                InputGestureText="Strg+D" />
+
+                            <Separator />
+
+                            <MenuItem
+                                Click="WrapWithStar_Click"
+                                Header="Fett"
+                                InputGestureText="Strg+F" />
+                        </ContextMenu>
+                    </TextBox.ContextMenu>
+                </TextBox>
             </Grid>
 
             <!--  StatusBar  -->
