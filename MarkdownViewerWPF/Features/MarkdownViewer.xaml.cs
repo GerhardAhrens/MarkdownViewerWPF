@@ -390,12 +390,18 @@
                 {
                     string a = cell.Trim();
 
-                    if (a.StartsWith(":") && a.EndsWith(":"))
+                    if (a.StartsWith(":", StringComparison.CurrentCultureIgnoreCase) && a.EndsWith(":", StringComparison.CurrentCultureIgnoreCase))
+                    {
                         alignments.Add(TextAlignment.Center);
-                    else if (a.EndsWith(":"))
+                    }
+                    else if (a.EndsWith(":", StringComparison.CurrentCultureIgnoreCase) == true)
+                    {
                         alignments.Add(TextAlignment.Right);
+                    }
                     else
+                    {
                         alignments.Add(TextAlignment.Left);
+                    }
                 }
             }
 
