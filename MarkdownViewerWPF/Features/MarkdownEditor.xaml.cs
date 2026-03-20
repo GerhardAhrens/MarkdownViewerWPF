@@ -2,6 +2,7 @@
 {
     using System.Globalization;
     using System.IO;
+    using System.Runtime.InteropServices;
     using System.Text;
     using System.Windows;
     using System.Windows.Controls;
@@ -45,8 +46,20 @@
                         new KeyGesture(Key.D, ModifierKeys.Control)));
 
             InputBindings.Add(new KeyBinding(
+            new EditorRelayCommand(o => this.InsertHeader("#"), null),
+            new KeyGesture(Key.H, ModifierKeys.Control)));
+
+            InputBindings.Add(new KeyBinding(
                         new EditorRelayCommand(o => this.WrapSelection("*"),null),
                         new KeyGesture(Key.F, ModifierKeys.Control)));
+
+            InputBindings.Add(new KeyBinding(
+                        new EditorRelayCommand(o => this.WrapSelection("**"), null),
+                        new KeyGesture(Key.I, ModifierKeys.Control)));
+
+            InputBindings.Add(new KeyBinding(
+                        new EditorRelayCommand(o => this.WrapSelection("***"), null),
+                        new KeyGesture(Key.J, ModifierKeys.Control)));
         }
 
         public string FileName { get; private set; }
@@ -247,6 +260,59 @@
             }
         }
 
+        private void InsertCurrentDate_Click(object sender, RoutedEventArgs e)
+        {
+            this.InsertCurrentDate();
+        }
+
+        private void InsertHeader_Click(object sender, RoutedEventArgs e)
+        {
+            MenuItem menuItem = sender as MenuItem;
+            if (menuItem != null)
+            {
+                string parameter = menuItem.Tag.ToString();
+                if (parameter == "#")
+                {
+                    this.InsertHeader(parameter);
+                }
+                else if (parameter == ">")
+                {
+                    this.InsertZitat(parameter);
+                }
+            }
+        }
+
+        private void WrapWithStar_Click(object sender, RoutedEventArgs e)
+        {
+            MenuItem menuItem = sender as MenuItem;
+            if (menuItem != null)
+            {
+                string parameter = menuItem.Tag.ToString();
+                this.WrapSelection(parameter);
+            }
+        }
+
+        private void InsertOnPosition_Click(object sender, RoutedEventArgs e)
+        {
+            MenuItem menuItem = sender as MenuItem;
+            if (menuItem != null)
+            {
+                string parameter = menuItem.Tag.ToString().ToLower(CultureInfo.CurrentCulture);
+                if (parameter == "url")
+                {
+                    this.InsertOnPosition("[AlternateText](WebSeiten-Url)");
+                }
+                else if (parameter == "bild")
+                {
+                    this.InsertOnPosition("![AlternateText](Bildname.png=BreitexHöhe)");
+                }
+                else if (parameter == "tab")
+                {
+                    this.InsertOnPosition($"| Spalte1 | Spalte2 | Spalte3 |\n|------|------:|------|\n| Text | Zahl | Text |\n");
+                }
+            }
+        }
+
         public void LoadFile(string path)
         {
             Editor.Text = File.ReadAllText(path);
@@ -296,10 +362,23 @@
             }
         }
 
-        private void InsertCurrentDate_Click(object sender, RoutedEventArgs e)
+        private void InsertOnPosition(string parameter)
         {
-            this.InsertCurrentDate();
+            string dataText = parameter;
+
+            int caret = Editor.CaretIndex;
+
+            if (Editor.SelectionLength > 0)
+            {
+                caret = Editor.SelectionStart;
+                Editor.Text = Editor.Text.Remove(Editor.SelectionStart, Editor.SelectionLength);
+            }
+
+            Editor.Text = Editor.Text.Insert(caret, dataText);
+            Editor.CaretIndex = caret + dataText.Length;
         }
+
+
         private void InsertCurrentDate()
         {
             string dateText = DateTime.Now.ToString("dd.MM.yyyy",CultureInfo.CurrentCulture);
@@ -316,9 +395,18 @@
             Editor.CaretIndex = caret + dateText.Length;
         }
 
-        private void WrapWithStar_Click(object sender, RoutedEventArgs e)
+        private void InsertHeader(string parameter)
         {
-            WrapSelection("*");
+            string headerText = $"{parameter} Titel";
+            Editor.Text = Editor.Text.Insert(0, headerText);
+            Editor.CaretIndex = 0 + headerText.Length;
+        }
+
+        private void InsertZitat(string parameter)
+        {
+            string headerText = $"{parameter} ";
+            Editor.Text = Editor.Text.Insert(0, headerText);
+            Editor.CaretIndex = 0 + headerText.Length;
         }
 
         private void WrapSelection(string wrapper)
