@@ -1,17 +1,22 @@
 ﻿namespace System.Windows.Documents
 {
     using System.Globalization;
+    using System.IO;
     using System.Text;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Input;
     using System.Windows.Media;
+    using System.Windows.Threading;
+
+    using Microsoft.Win32;
 
     /// <summary>
     /// Interaktionslogik für MarkdownEditor.xaml
     /// </summary>
     public partial class MarkdownEditor : UserControl
     {
+        private const string DATEIFILTER = "Markdown (*.md)|*.md|Textdateien (*.txt)|*.txt|Alle Dateien (*.*)|*.*";
         private ScrollViewer editorScrollViewer;
         private double lineHeight;
 
@@ -19,14 +24,33 @@
         {
             this.InitializeComponent();
 
+            Application.Current.Dispatcher.BeginInvoke(
+                DispatcherPriority.Background, 
+                new Action(() => 
+                { 
+                    this.Editor.Focus(); 
+                }));
+            
+
             InputBindings.Add(new KeyBinding(
-                        new EditorRelayCommand(o => InsertCurrentDate(),null),
+            new EditorRelayCommand(o => OpenFileDialog()),
+            new KeyGesture(Key.O, ModifierKeys.Control)));
+
+            InputBindings.Add(new KeyBinding(
+                    new EditorRelayCommand(o => this.Save()),
+                    new KeyGesture(Key.S, ModifierKeys.Control)));
+
+            InputBindings.Add(new KeyBinding(
+                        new EditorRelayCommand(o => this.InsertCurrentDate(),null),
                         new KeyGesture(Key.D, ModifierKeys.Control)));
 
             InputBindings.Add(new KeyBinding(
-                        new EditorRelayCommand(o => WrapSelection("*"),null),
+                        new EditorRelayCommand(o => this.WrapSelection("*"),null),
                         new KeyGesture(Key.F, ModifierKeys.Control)));
         }
+
+        public string FileName { get; private set; }
+        public bool IsModified { get; private set; }
 
         private void Editor_Loaded(object sender, RoutedEventArgs e)
         {
@@ -48,6 +72,7 @@
         }
         private void Editor_TextChanged(object sender, TextChangedEventArgs e)
         {
+            this.IsModified = true;
             this.UpdateEditorVisuals();
         }
 
@@ -81,6 +106,15 @@
             int bytePos = Encoding.UTF8.GetByteCount(Editor.Text.AsSpan(0, caret));
 
             this.StatusUtf.Text = $"UTF: {utfPos}  Bytes: {bytePos}";
+
+            string name = string.IsNullOrEmpty(FileName) ? "Neue Datei" : Path.GetFileName(FileName);
+
+            if (IsModified)
+            {
+                name += " *";
+            }
+
+            StatusFile.Text = name;
         }
 
         private void UpdateLineNumbers()
@@ -127,7 +161,7 @@
 
             double y = line * this.lineHeight - this.editorScrollViewer.VerticalOffset;
 
-            this.CurrentLineHighlight.Height = this.lineHeight;
+            this.CurrentLineHighlight.Height = this.lineHeight + 8;
             this.CurrentLineHighlight.Margin = new Thickness(0, y, 0, 0);
         }
 
@@ -189,6 +223,79 @@
         #endregion Text per Doppelklick markieren
 
         #region Bereich für Kontextmenü
+        private void LoadFile_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog dlg = new OpenFileDialog();
+
+            dlg.Filter = DATEIFILTER;
+
+            if (dlg.ShowDialog() == true)
+            {
+                this.LoadFile(dlg.FileName);
+            }
+        }
+
+        private void SaveFile_Click(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog dlg = new SaveFileDialog();
+
+            dlg.Filter = DATEIFILTER;
+
+            if (dlg.ShowDialog() == true)
+            {
+                this.SaveFile(dlg.FileName);
+            }
+        }
+
+        public void LoadFile(string path)
+        {
+            Editor.Text = File.ReadAllText(path);
+
+            FileName = path;
+            IsModified = false;
+            this.UpdateStatus();
+        }
+
+        public void SaveFile(string path)
+        {
+            File.WriteAllText(path, Editor.Text);
+
+            this.FileName = path;
+            this.IsModified = false;
+            this.UpdateStatus();
+        }
+
+        public void Save()
+        {
+            if (string.IsNullOrEmpty(FileName))
+            {
+                SaveFileDialog dlg = new SaveFileDialog();
+
+                dlg.Filter = DATEIFILTER;
+
+                if (dlg.ShowDialog() == true)
+                {
+                    this.SaveFile(dlg.FileName);
+                }
+            }
+            else
+            {
+                this.SaveFile(FileName);
+            }
+        }
+
+        private void OpenFileDialog()
+        {
+            OpenFileDialog dlg = new OpenFileDialog();
+
+            dlg.Filter = DATEIFILTER;
+
+            if (dlg.ShowDialog() == true)
+            {
+                this.LoadFile(dlg.FileName);
+            }
+        }
+
         private void InsertCurrentDate_Click(object sender, RoutedEventArgs e)
         {
             this.InsertCurrentDate();

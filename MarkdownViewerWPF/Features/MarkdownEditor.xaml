@@ -51,7 +51,7 @@
                     FontSize="14"
                     HorizontalScrollBarVisibility="Auto"
                     Loaded="Editor_Loaded"
-                     MouseDoubleClick="Editor_MouseDoubleClick"
+                    MouseDoubleClick="Editor_MouseDoubleClick"
                     SelectionChanged="Editor_SelectionChanged"
                     TextChanged="Editor_TextChanged"
                     VerticalScrollBarVisibility="Auto">
@@ -60,6 +60,18 @@
                             <MenuItem Command="ApplicationCommands.Cut" Header="Ausschneiden" />
                             <MenuItem Command="ApplicationCommands.Copy" Header="Kopieren" />
                             <MenuItem Command="ApplicationCommands.Paste" Header="Einfügen" />
+
+                            <Separator />
+
+                            <MenuItem
+                                Click="LoadFile_Click"
+                                Header="Datei laden"
+                                InputGestureText="Strg+O" />
+
+                            <MenuItem
+                                Click="SaveFile_Click"
+                                Header="Datei speichern"
+                                InputGestureText="Strg+S" />
 
                             <Separator />
 
@@ -107,6 +119,9 @@
                     <TextBlock x:Name="StatusUtf" />
                 </StatusBarItem>
 
+                <StatusBarItem>
+                    <TextBlock x:Name="StatusFile" />
+                </StatusBarItem>
             </StatusBar>
         </Grid>
     </Border>
