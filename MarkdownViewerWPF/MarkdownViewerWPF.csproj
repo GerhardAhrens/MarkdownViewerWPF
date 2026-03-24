@@ -22,22 +22,23 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="Resources\Picture\ApplicationIcon.ico" />
+    <None Remove="Resources\Picture\_PreviewImage.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Picture\ApplicationIcon.ico" />
   </ItemGroup>
 
   <ItemGroup>
     <Resource Include="Resources\Picture\ApplicationIcon.ico" />
-    <Resource Include="Resources\Picture\ApplicationIcon.png" />
+    <Resource Include="Resources\Picture\_PreviewImage.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <EmbeddedResource Include="Resources\Picture\ApplicationIcon.png" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Resources\Style\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Resources\Picture\_PreviewImage.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
 </Project>

@@ -94,7 +94,7 @@
             bool quoteActive = false;
             Paragraph codeParagraph = null;
             List<string> tableLines = new List<string>();
-            List numericList = new List {MarkerStyle = TextMarkerStyle.Decimal };
+            List numericList = new List { MarkerStyle = TextMarkerStyle.Decimal };
             List<string> quoteLines = new List<string>();
 
             foreach (var line in lines)
@@ -150,7 +150,7 @@
                     continue;
                 }
 
-                if (line.StartsWith("### ", StringComparison.CurrentCultureIgnoreCase) ==  true)
+                if (line.StartsWith("### ", StringComparison.CurrentCultureIgnoreCase) == true)
                 {
                     doc.Blocks.Add(CreateHeader(line.Substring(4), 18));
                     continue;
@@ -284,7 +284,7 @@
                         Background = Brushes.LightGray
                     });
                 }
-                else if (token.StartsWith("![", StringComparison.CurrentCultureIgnoreCase) == true)
+                else if (token.StartsWith("--![", StringComparison.CurrentCultureIgnoreCase) == true)
                 {
                     var m = Regex.Match(token, @"!\[(.*?)\]\((.*?)(?:\s*=\s*(\d*)x(\d*))?\)");
 
@@ -315,6 +315,32 @@
                     catch
                     {
                         // Fallback wenn Bild nicht geladen werden kann
+                        span.Inlines.Add(new Run($"[Image: {alt}]"));
+                    }
+                }
+                else if (token.StartsWith("![", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    var m = Regex.Match(token, @"!\[(.*?)\]\((.*?)(?:\s*=\s*(\d*)x(\d*))?\)");
+
+                    string alt = m.Groups[1].Value;
+                    string url = m.Groups[2].Value;
+                    string width = m.Groups[3].Value == string.Empty ? "32" : m.Groups[3].Value;
+                    string height = m.Groups[4].Value == string.Empty ? "32" : m.Groups[4].Value;
+
+                    Image image = new Image
+                    {
+                        Width = Convert.ToDouble(width, CultureInfo.CurrentCulture),
+                        Height = Convert.ToDouble(height, CultureInfo.CurrentCulture),
+                        Margin = new Thickness(4)
+                    };
+
+                    try
+                    {
+                        image.Source = LoadImageSource(url);
+                        span.Inlines.Add(new InlineUIContainer(image));
+                    }
+                    catch
+                    {
                         span.Inlines.Add(new Run($"[Image: {alt}]"));
                     }
                 }
@@ -520,6 +546,42 @@
             }
 
             return section;
+        }
+
+        private static BitmapImage LoadImageSource(string path)
+        {
+            BitmapImage result = null;
+            if (path.StartsWith("res:", StringComparison.CurrentCultureIgnoreCase))
+            {
+                /* Eigenschaften: Ressource */
+                /* ![Logo](res:Resources/Picture/_PreviewImage.png=64x64) */
+                string resourcePath = path.Substring(4);
+
+                var uri = new Uri($"pack://application:,,,/{resourcePath}", UriKind.RelativeOrAbsolute);
+
+                try
+                {
+                    result = new BitmapImage(uri);
+                }
+                catch (Exception)
+                {
+                    return new BitmapImage();
+                }
+
+                return result;
+            }
+
+            if (Uri.IsWellFormedUriString(path, UriKind.Absolute))
+            {
+                return new BitmapImage(new Uri(path));
+            }
+
+            if (System.IO.File.Exists(path))
+            {
+                return new BitmapImage(new Uri(path, UriKind.Absolute));
+            }
+
+            return new BitmapImage(new Uri(path, UriKind.Relative));
         }
     }
 }
