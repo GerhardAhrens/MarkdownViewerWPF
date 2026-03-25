@@ -80,15 +80,8 @@
             </StackPanel>
         </Border>
 
-        <ContentPresenter x:Name="contentView" Grid.Row="1"/>
+        <ContentPresenter x:Name="contentView" Grid.Row="1" />
 
-        <!--
-        <doc:MarkdownViewer x:Name="markdownViewer" Grid.Row="1" />
-        -->
-
-        <!--
-        <doc:MarkdownEditor x:Name="PART_MarkdownEditor" Grid.Row="1" />
-        -->
 
         <!--#region Statuszeile-->
         <StatusBar

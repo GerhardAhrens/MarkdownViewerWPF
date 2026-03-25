@@ -240,8 +240,7 @@
             Span span = new Span();
 
             var matches = Regex.Matches(text,
-                @"`[^`]+`|\*\*\*[^*]+\*\*\*|\*\*[^*]+\*\*|\*[^*]+\*|!\[[^\]]*\]\([^\)]+\)|\[[^\]]+\]\([^\)]+\)|\\.|[^*`\[\\]+"
-            );
+                @"`[^`]+`|\*\*\*[^*]+\*\*\*|\*\*[^*]+\*\*|\*[^*]+\*|!\[[^\]]*\]\([^\)]+\)|\[[^\]]+\]\([^\)]+\)|\\.|[^*`\[\\]+");
 
             foreach (Match match in matches)
             {
@@ -251,13 +250,7 @@
                 {
                     string value = token.Substring(3, token.Length - 6);
 
-                    span.Inlines.Add(
-                        new Bold(
-                            new Italic(
-                                new Run(value)
-                            )
-                        )
-                    );
+                    span.Inlines.Add(new Bold( new Italic(new Run(value))));
                 }
                 else if (token.StartsWith("**", StringComparison.CurrentCultureIgnoreCase) && token.EndsWith("**", StringComparison.CurrentCultureIgnoreCase))
                 {
@@ -283,40 +276,6 @@
                         FontFamily = new FontFamily("Consolas"),
                         Background = Brushes.LightGray
                     });
-                }
-                else if (token.StartsWith("--![", StringComparison.CurrentCultureIgnoreCase) == true)
-                {
-                    var m = Regex.Match(token, @"!\[(.*?)\]\((.*?)(?:\s*=\s*(\d*)x(\d*))?\)");
-
-                    string alt = m.Groups[1].Value;
-                    string url = m.Groups[2].Value;
-                    string width = m.Groups[3].Value == string.Empty ? "32" : m.Groups[3].Value;
-                    string height = m.Groups[4].Value == string.Empty ? "32" : m.Groups[4].Value;
-
-                    try
-                    {
-                        string path = url;
-
-                        if (!Uri.IsWellFormedUriString(url, UriKind.RelativeOrAbsolute) && string.IsNullOrEmpty(BasePath) == false)
-                        {
-                            path = Path.GetRelativePath(BasePath, url);
-                        }
-
-                        Image image = new Image
-                        {
-                            Source = new BitmapImage(new Uri(path, UriKind.RelativeOrAbsolute)),
-                            Width = Convert.ToDouble(width, CultureInfo.CurrentCulture),
-                            Height = Convert.ToDouble(height, CultureInfo.CurrentCulture),
-                            Margin = new Thickness(4)
-                        };
-
-                        span.Inlines.Add(new InlineUIContainer(image));
-                    }
-                    catch
-                    {
-                        // Fallback wenn Bild nicht geladen werden kann
-                        span.Inlines.Add(new Run($"[Image: {alt}]"));
-                    }
                 }
                 else if (token.StartsWith("![", StringComparison.CurrentCultureIgnoreCase))
                 {
@@ -440,7 +399,9 @@
             foreach (var line in lines)
             {
                 if (Regex.IsMatch(line, @"^\|\s*[:\-]+\s*(\|\s*[:\-]+\s*)*\|?$"))
+                {
                     continue;
+                }
 
                 parsedRows.Add(
                     line.Split('|', StringSplitOptions.RemoveEmptyEntries)
@@ -523,7 +484,9 @@
                     double w = MeasureTextWidth(row[i]) + 20; // Padding
 
                     if (w > widths[i])
+                    {
                         widths[i] = w;
+                    }
                 }
             }
 
@@ -576,7 +539,7 @@
                 return new BitmapImage(new Uri(path));
             }
 
-            if (System.IO.File.Exists(path))
+            if (System.IO.File.Exists(path) == true)
             {
                 return new BitmapImage(new Uri(path, UriKind.Absolute));
             }

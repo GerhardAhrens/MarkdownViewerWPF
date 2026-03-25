@@ -1,0 +1,4 @@
+﻿[*.cs]
+
+# IDE0100: Redundante Gleichheit entfernen
+dotnet_diagnostic.IDE0100.severity = silent

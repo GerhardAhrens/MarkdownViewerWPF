@@ -25,12 +25,14 @@ Folgende Funktionen werden dabei unterstützt:
 | `var x = 5;` | Inline Code|
 |```var x = 5;```| Codeblock |
 | [GitHub](https://github.com/GerhardAhrens?tab=repositories) | anklickbarer Web Link|
+|![AlternateText](Bildname.png=BreitexHöhe)| Bild als URL oder Datei |
+|![AlternateText](res:Resources/Picture/Bildname.png=BreitexHöhe)| Bild aus WPF Resource|
+| Tabelle | Beliebige Zeilen und Spalten mit automatischer Spaltenbreite|
+
+### Hinweis zu Bildern
+Bilder die aus einer WPF Resource gelesen mit (res:) werden, müssen als "Ressource" festgelegt werden.
 
 
-## Parser des MarkdownViever
-
-```csharp
-```
 ## Features des MarkdownEditor
 Der MarkdownEditor ist als eigenes Control implementiert, das in WPF-Anwendungen eingebettet werden kann.
 Der Editor hat links eine Zeilennummerierung, unten eine Statuszeile. Alle weiteren Funktionen werden über das Kontextmenü ausgeführt.
