@@ -61,19 +61,30 @@
                 <Button
                     Width="30"
                     Height="30"
-                    Margin="5,0,0,0"
+                    Margin="50,0,0,0"
                     HorizontalAlignment="Left"
                     Command="{Binding Path=EditMarkdownCommand}"
                     ToolTip="Markdown Datei bearbeiten">
                     <Image Source="{StaticResource ResourceKey=IconEditMarkdown}" Stretch="None" />
                 </Button>
+
+                <Button
+                    Width="30"
+                    Height="30"
+                    Margin="5,0,0,0"
+                    HorizontalAlignment="Left"
+                    Command="{Binding Path=ViewMarkdownCommand}"
+                    ToolTip="Markdown Datei bearbeiten">
+                    <Image Source="{StaticResource ResourceKey=IconViewMarkdown}" Stretch="Fill" />
+                </Button>
             </StackPanel>
         </Border>
+
+        <ContentPresenter x:Name="contentView" Grid.Row="1"/>
 
         <!--
         <doc:MarkdownViewer x:Name="markdownViewer" Grid.Row="1" />
         -->
-        <doc:MarkdownViewer x:Name="markdownViewer" Grid.Row="1" />
 
         <!--
         <doc:MarkdownEditor x:Name="PART_MarkdownEditor" Grid.Row="1" />

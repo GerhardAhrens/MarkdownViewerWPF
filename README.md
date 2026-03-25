@@ -9,7 +9,7 @@
 
 Der MarkdownViewer ist als eigenes Control implementiert, das in WPF-Anwendungen eingebettet werden kann.
 
-<img src="MainWindow.png" style="width:650px;"/>
+<img src="MarkdownViewer.png" style="width:650px;"/>
 
 Grundsätzlich werden die Unterstützung von Standard-Markdown-Syntaxelementen verarbeite.
 Folgende Funktionen werden dabei unterstützt:
@@ -29,3 +29,10 @@ Folgende Funktionen werden dabei unterstützt:
 
 ## Parser des MarkdownViever
 
+```csharp
+```
+## Features des MarkdownEditor
+Der MarkdownEditor ist als eigenes Control implementiert, das in WPF-Anwendungen eingebettet werden kann.
+Der Editor hat links eine Zeilennummerierung, unten eine Statuszeile. Alle weiteren Funktionen werden über das Kontextmenü ausgeführt.
+
+<img src="MarkdownEditor.png" style="width:650px;"/>

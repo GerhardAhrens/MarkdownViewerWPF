@@ -1,7 +1,8 @@
 <Solution>
   <Folder Name="/_Doc/">
     <File Path="LICENSE.txt" />
-    <File Path="MainWindow.png" />
+    <File Path="MarkdownEditor.png" />
+    <File Path="MarkdownViewer.png" />
     <File Path="README.md" />
   </Folder>
   <Project Path="MarkdownViewerWPF/MarkdownViewerWPF.csproj" />

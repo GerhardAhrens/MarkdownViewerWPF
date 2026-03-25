@@ -302,9 +302,13 @@
                 {
                     this.InsertOnPosition("[AlternateText](WebSeiten-Url)");
                 }
-                else if (parameter == "bild")
+                else if (parameter == "bildfile")
                 {
                     this.InsertOnPosition("![AlternateText](Bildname.png=BreitexHöhe)");
+                }
+                else if (parameter == "bildres")
+                {
+                    this.InsertOnPosition("![AlternateText](res:Resources/Picture/_PreviewImage.png=BreitexHöhe)");
                 }
                 else if (parameter == "tab")
                 {

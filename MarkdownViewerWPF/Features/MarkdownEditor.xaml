@@ -62,7 +62,14 @@
                             <MenuItem Command="ApplicationCommands.Paste" Header="Einfügen" />
 
                             <Separator />
+                            
+                            <MenuItem
+                                Click="LoadFile_Click"
+                                Header="Markdown Dokument Info"
+                                InputGestureText="Strg+O" />
 
+                            <Separator />
+                            
                             <MenuItem
                                 Click="LoadFile_Click"
                                 Header="Datei laden"
@@ -120,8 +127,13 @@
 
                             <MenuItem
                                 Click="InsertOnPosition_Click"
-                                Header="Bild einfügen"
-                                Tag="bild" />
+                                Header="Bild einfügen (als Datei oder URL)"
+                                Tag="bildfile" />
+
+                            <MenuItem
+                                Click="InsertOnPosition_Click"
+                                Header="Bild einfügen (aus WPF Resource)"
+                                Tag="bildres" />
 
                             <MenuItem
                                 Click="InsertOnPosition_Click"

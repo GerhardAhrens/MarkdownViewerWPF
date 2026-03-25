@@ -17,6 +17,7 @@ namespace MarkdownViewerWPF
 {
     using System.ComponentModel;
     using System.Windows;
+    using System.Windows.Documents;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -33,8 +34,9 @@ namespace MarkdownViewerWPF
             this.QuitParamCommand = new CommandBase(() => this.OnQuit("Argument"));
             this.StartCommand = new CommandBase(OnStart);
             this.EditMarkdownCommand = new CommandBase(OnEditMarkdown);
+            this.ViewMarkdownCommand = new CommandBase(OnViewMarkdown);
 
-            this.WindowTitel = "Minimal WPF Template";
+            this.WindowTitel = "Markdown Viewer / Editor";
             this.DataContext = this;
         }
 
@@ -42,6 +44,7 @@ namespace MarkdownViewerWPF
         public CommandBase QuitParamCommand { get; private set; }
         public CommandBase StartCommand { get; private set; }
         public CommandBase EditMarkdownCommand { get; private set; }
+        public CommandBase ViewMarkdownCommand { get; private set; }
 
         public string WindowTitel
         {
@@ -54,15 +57,6 @@ namespace MarkdownViewerWPF
             StatusbarMain.Statusbar.DatabaseInfo = "Keine";
             StatusbarMain.Statusbar.DatabaseInfoTooltip = "Keine Datenbank verbunden";
             StatusbarMain.Statusbar.Notification = "Bereit";
-
-            string gruppe0 = "![NET](https://img.shields.io/badge/NET-10.0-green.png=80x20)![License](https://img.shields.io/badge/License-Customer-blue.png=120x20)![VS2022](https://img.shields.io/badge/Visual%20Studio-2026-white.png=120x20)![Version](https://img.shields.io/badge/Version-1.0.2026.26-yellow.png=120x20)";
-            string gruppeA = $"# Titel\n## Abschnitt\nText mit **Bold** und *Italic*\nText mit ***Bold und Italic***\n- Item 1\n- Item 2\n\nInline Code `var x = 5;`\n[GoogleWeb](https://google.com)";
-            string gruppeB = $"# Titel\n| Name | Alter | Beruf |\n|------|------:|------|\n| Anna | 28 | Entwickler |\n| Max | 35 | Designer |\nNormaler Text mit **Bold** und *Italic*.\n![Logo](res:Resources/Picture/_PreviewImage.png=64x64)";
-            string gruppeC = $"- Bullet Lists1\n- Bullet Lists2\n\n1. Bullet Lists1\n2. Bullet Lists2\n";
-            string gruppeD = $"> Dies ist ein Zitat\r\n> über mehrere Zeilen\r\n> mit **Markdown**";
-            string gruppeE = $"<!-- Dies ist ein ausgeblendeter Kommentar -->\nNormaler Text";
-            string gruppeF = $"Codeblock\n```\nvar x = 5;\n```";
-            this.markdownViewer.MarkdownText = $"{gruppe0}\n{gruppeA}\n\n{gruppeB}\n{gruppeC}\n{gruppeD}\n{gruppeE}\n{gruppeF}\n";
         }
 
         private void OnCloseApplication(object sender, RoutedEventArgs e)
@@ -83,6 +77,22 @@ namespace MarkdownViewerWPF
 
         private void OnEditMarkdown()
         {
+            this.contentView.Content = new MarkdownEditor();
+        }
+
+        private void OnViewMarkdown()
+        {
+            string gruppe0 = "![NET](https://img.shields.io/badge/NET-10.0-green.png=80x20)![License](https://img.shields.io/badge/License-Customer-blue.png=120x20)![VS2022](https://img.shields.io/badge/Visual%20Studio-2026-white.png=120x20)![Version](https://img.shields.io/badge/Version-1.0.2026.26-yellow.png=120x20)";
+            string gruppeA = $"# Titel\n## Abschnitt\nText mit **Bold** und *Italic*\nText mit ***Bold und Italic***\n- Item 1\n- Item 2\n\nInline Code `var x = 5;`\n[GoogleWeb](https://google.com)";
+            string gruppeB = $"# Titel\n| Name | Alter | Beruf |\n|------|------:|------|\n| Anna | 28 | Entwickler |\n| Max | 35 | Designer |\nNormaler Text mit **Bold** und *Italic*.\n![Logo](res:Resources/Picture/_PreviewImage.png=64x64)";
+            string gruppeC = $"- Bullet Lists1\n- Bullet Lists2\n\n1. Bullet Lists1\n2. Bullet Lists2\n";
+            string gruppeD = $"> Dies ist ein Zitat\r\n> über mehrere Zeilen\r\n> mit **Markdown**";
+            string gruppeE = $"<!-- Dies ist ein ausgeblendeter Kommentar -->\nNormaler Text";
+            string gruppeF = $"Codeblock\n```\nvar x = 5;\n```";
+
+            MarkdownViewer view = new MarkdownViewer();
+            view.MarkdownText = $"{gruppe0}\n{gruppeA}\n\n{gruppeB}\n{gruppeC}\n{gruppeD}\n{gruppeE}\n{gruppeF}\n";
+            this.contentView.Content = view;
         }
 
         private void OnQuit(string param)
