@@ -11,11 +11,15 @@
     using System.Windows.Media.Imaging;
     using System.Windows.Navigation;
 
+    using Microsoft.Win32;
+
     /// <summary>
     /// Interaktionslogik für MarkdownViewer.xaml
     /// </summary>
     public partial class MarkdownViewer : UserControl
     {
+        private const string DATEIFILTER = "Markdown (*.md)|*.md|Alle Dateien (*.*)|*.*";
+
         public MarkdownViewer()
         {
             this.InitializeComponent();
@@ -47,14 +51,6 @@
             viewer.RenderMarkdown(e.NewValue as string);
         }
 
-        public void LoadMarkdownFile(string file)
-        {
-            if (File.Exists(file))
-            {
-                this.MarkdownText = File.ReadAllText(file);
-            }
-        }
-
         private void RenderMarkdown(string markdown)
         {
             FlowDocument doc = MarkdownParser.Parse(markdown ?? "");
@@ -70,6 +66,26 @@
             });
 
             e.Handled = true;
+        }
+
+        private void OpenFileClick(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog dlg = new OpenFileDialog();
+            dlg.Title = "Markdown-Datei öffnen";
+            dlg.Filter = DATEIFILTER;
+
+            if (dlg.ShowDialog() == true)
+            {
+                this.LoadMarkdownFile(dlg.FileName);
+            }
+        }
+
+        public void LoadMarkdownFile(string file)
+        {
+            if (File.Exists(file))
+            {
+                this.MarkdownText = File.ReadAllText(file);
+            }
         }
     }
 
@@ -193,6 +209,11 @@
 
                     if (numericListActive == true)
                     {
+                        if (numericList == null)
+                        {
+                            numericList = new() { MarkerStyle = TextMarkerStyle.Decimal };
+                        }
+
                         string itemText = Regex.Replace(line, @"^\d+\.\s+", "");
                         ListItem item = new ListItem(new Paragraph(ParseInline(itemText)));
                         numericList.ListItems.Add(item);

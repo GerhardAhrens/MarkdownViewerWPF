@@ -18,7 +18,16 @@
                 BorderThickness="0"
                 HorizontalScrollBarVisibility="Auto"
                 IsReadOnly="True"
-                VerticalScrollBarVisibility="Auto" />
+                VerticalScrollBarVisibility="Auto">
+                <RichTextBox.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Command="ApplicationCommands.Copy" Header="Copy" />
+                        <MenuItem Command="ApplicationCommands.SelectAll" Header="Select All" />
+                        <Separator />
+                        <MenuItem Click="OpenFileClick" Header="Öffenen" />
+                    </ContextMenu>
+                </RichTextBox.ContextMenu>
+            </RichTextBox>
         </Border>
     </Grid>
 </UserControl>

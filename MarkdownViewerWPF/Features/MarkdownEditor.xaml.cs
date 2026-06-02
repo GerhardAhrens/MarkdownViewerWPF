@@ -244,7 +244,7 @@
         private void LoadFile_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog dlg = new OpenFileDialog();
-
+            dlg.Title = "Markdown-Datei öffnen";
             dlg.Filter = DATEIFILTER;
 
             if (dlg.ShowDialog() == true)
@@ -256,7 +256,7 @@
         private void SaveFile_Click(object sender, RoutedEventArgs e)
         {
             SaveFileDialog dlg = new SaveFileDialog();
-
+            dlg.Title = "Markdown-Datei speichern";
             dlg.Filter = DATEIFILTER;
 
             if (dlg.ShowDialog() == true)
