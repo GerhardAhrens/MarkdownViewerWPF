@@ -3,6 +3,7 @@
     using System.Globalization;
     using System.IO;
     using System.Text;
+    using System.Text.RegularExpressions;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Input;
@@ -63,6 +64,10 @@
             InputBindings.Add(new KeyBinding(
                         new EditorRelayCommand(o => this.WrapSelection("***"), null),
                         new KeyGesture(Key.J, ModifierKeys.Control)));
+
+            InputBindings.Add(new KeyBinding(
+                        new EditorRelayCommand(o => this.InserMarkdownInfo(), null),
+                        new KeyGesture(Key.I, ModifierKeys.Control)));
         }
 
         public string FileName { get; private set; }
@@ -338,7 +343,7 @@
         private void LoadFile_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog dlg = new OpenFileDialog();
-
+            dlg.Title = "Markdown-Datei öffnen";
             dlg.Filter = DATEIFILTER;
 
             if (dlg.ShowDialog() == true)
@@ -350,12 +355,21 @@
         private void SaveFile_Click(object sender, RoutedEventArgs e)
         {
             SaveFileDialog dlg = new SaveFileDialog();
-
+            dlg.Title = "Markdown-Datei speichern";
             dlg.Filter = DATEIFILTER;
 
             if (dlg.ShowDialog() == true)
             {
                 this.SaveFile(dlg.FileName);
+            }
+        }
+
+        private void InsertMarkdownInfo_Click(object sender, RoutedEventArgs e)
+        {
+            MenuItem menuItem = sender as MenuItem;
+            if (menuItem != null)
+            {
+                this.InserMarkdownInfo();
             }
         }
 
@@ -481,6 +495,13 @@
             Editor.CaretIndex = caret + dataText.Length;
         }
 
+        private void InserMarkdownInfo()
+        {
+            string currentYear = DateTime.Now.Year.ToString(CultureInfo.CurrentCulture);
+            string markdownInfo = $"![NET](https://img.shields.io/badge/NET-10.0-green.png=80x20)![License](https://img.shields.io/badge/License-Customer-blue.png=120x20)![VS2022](https://img.shields.io/badge/Visual%20Studio-2026-white.png=120x20)![Version](https://img.shields.io/badge/Version-1.0.{currentYear}.0-yellow.png=120x20)";
+            Editor.Text = Editor.Text.Insert(0, markdownInfo);
+            Editor.CaretIndex = 0 + markdownInfo.Length;
+        }
 
         private void InsertCurrentDate()
         {
@@ -507,9 +528,13 @@
 
         private void InsertZitat(string parameter)
         {
-            string headerText = $"{parameter} ";
-            Editor.Text = Editor.Text.Insert(0, headerText);
-            Editor.CaretIndex = 0 + headerText.Length;
+            string zitatSymbol = $"{parameter} ";
+
+            if (Editor.SelectionLength > 0)
+            {
+                this.WrapSelectionLeft(zitatSymbol);
+            }
+
         }
 
         private void WrapSelection(string wrapper)
@@ -524,11 +549,40 @@
 
             string selectedText = Editor.SelectedText;
 
-            string newText = wrapper + selectedText + wrapper;
+            string newText = $"{wrapper}{selectedText}{wrapper}";
 
             Editor.Text = Editor.Text.Remove(start, length);
             Editor.Text = Editor.Text.Insert(start, newText);
 
+            Editor.SelectionStart = start;
+            Editor.SelectionLength = newText.Length;
+        }
+
+        private void WrapSelectionLeft(string wrapper)
+        {
+            int start = Editor.SelectionStart;
+            int length = Editor.SelectionLength;
+
+            if (length == 0)
+            {
+                return;
+            }
+
+            string selectedText = Editor.SelectedText;
+
+            string newText = string.Empty ;
+            if (selectedText.Split('\n').Length == 1)
+            {
+                newText = $"{wrapper}{newText}";
+            }
+            else
+            {
+                newText = $"{wrapper}{selectedText}";
+                newText = Regex.Replace(newText, @"\r?\n", "$0" + wrapper).TrimEnd(wrapper.ToCharArray());
+            }
+
+            Editor.Text = Editor.Text.Remove(start, length);
+            Editor.Text = Editor.Text.Insert(start, newText);
             Editor.SelectionStart = start;
             Editor.SelectionLength = newText.Length;
         }

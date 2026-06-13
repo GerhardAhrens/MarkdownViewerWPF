@@ -3,7 +3,7 @@
 ![NET](https://img.shields.io/badge/NET-10.0-green.svg)
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)
 ![VS2026](https://img.shields.io/badge/Visual%20Studio-2026-white.svg)
-![Version](https://img.shields.io/badge/Version-1.0.2026.0-yellow.svg)]
+![Version](https://img.shields.io/badge/Version-1.0.2026.2-yellow.svg)]
 
 ## Features des MarkdownViever
 
@@ -28,6 +28,7 @@ Folgende Funktionen werden dabei unterstützt:
 |![AlternateText](Bildname.png=BreitexHöhe)| Bild als URL oder Datei |
 |![AlternateText](res:Resources/Picture/Bildname.png=BreitexHöhe)| Bild aus WPF Resource|
 | Tabelle | Beliebige Zeilen und Spalten mit automatischer Spaltenbreite|
+| `>` Zitat | Beliebige Zeilen als Zitat markieren|
 
 ### Hinweis zu Bildern
 Bilder die aus einer WPF Resource gelesen mit (res:) werden, müssen als "Ressource" festgelegt werden.
@@ -38,3 +39,8 @@ Der MarkdownEditor ist als eigenes Control implementiert, das in WPF-Anwendungen
 Der Editor hat links eine Zeilennummerierung, unten eine Statuszeile. Alle weiteren Funktionen werden über das Kontextmenü ausgeführt.
 
 <img src="MarkdownEditor.png" style="width:650px;"/>
+
+## Versionshistorie
+[![Versionshistorie](https://img.shields.io/badge/Version-%201.0.2026.2-blue.svg)](#)
+- Mehrere Zeilen als Zital markieren  
+- Überarbeitung Source Code, um die Wartbarkeit zu verbessern

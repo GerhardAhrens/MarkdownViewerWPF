@@ -64,9 +64,9 @@
                             <Separator />
                             
                             <MenuItem
-                                Click="LoadFile_Click"
+                                Click="InsertMarkdownInfo_Click"
                                 Header="Markdown Dokument Info"
-                                InputGestureText="Strg+O" />
+                                InputGestureText="Strg+I" />
 
                             <Separator />
                             
