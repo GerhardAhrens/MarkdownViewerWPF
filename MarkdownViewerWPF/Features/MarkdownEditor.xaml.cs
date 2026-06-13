@@ -2,7 +2,6 @@
 {
     using System.Globalization;
     using System.IO;
-    using System.Runtime.InteropServices;
     using System.Text;
     using System.Windows;
     using System.Windows.Controls;
@@ -15,8 +14,10 @@
     /// <summary>
     /// Interaktionslogik für MarkdownEditor.xaml
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Member als statisch markieren", Justification = "<Ausstehend>")]
     public partial class MarkdownEditor : UserControl
     {
+        private const string IndentString = "    "; // 4 Leerzeichen
         private const string DATEIFILTER = "Markdown (*.md)|*.md|Textdateien (*.txt)|*.txt|Alle Dateien (*.*)|*.*";
         private ScrollViewer editorScrollViewer;
         private double lineHeight;
@@ -31,7 +32,9 @@
                 { 
                     this.Editor.Focus(); 
                 }));
-            
+
+
+            WeakEventManager<TextBox, KeyEventArgs>.AddHandler(this.Editor, "PreviewKeyDown", this.OnEditorPreviewKeyDown);
 
             InputBindings.Add(new KeyBinding(
             new EditorRelayCommand(o => OpenFileDialog()),
@@ -94,9 +97,105 @@
             this.UpdateEditorVisuals();
         }
 
+        private void OnEditorPreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key != Key.Tab)
+            {
+                return;
+            }
+
+            var textBox = (TextBox)sender;
+
+            if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
+            {
+                this.UnindentSelection(textBox);
+            }
+            else
+            {
+                this.IndentSelection(textBox);
+            }
+
+            e.Handled = true;
+        }
+
         private void EditorScrollChanged(object sender, ScrollChangedEventArgs e)
         {
             this.UpdateLineNumbers();
+        }
+
+        private void IndentSelection(TextBox textBox)
+        {
+            string text = textBox.Text;
+
+            int selectionStart = textBox.SelectionStart;
+            int selectionLength = textBox.SelectionLength;
+
+            int firstLine = textBox.GetLineIndexFromCharacterIndex(selectionStart);
+
+            int lastChar = selectionLength > 0 ? selectionStart + selectionLength - 1 : selectionStart;
+
+            int lastLine = textBox.GetLineIndexFromCharacterIndex(lastChar);
+
+            int startIndex = textBox.GetCharacterIndexFromLineIndex(firstLine);
+
+            int endIndex = lastLine < textBox.LineCount - 1 ? textBox.GetCharacterIndexFromLineIndex(lastLine + 1) : text.Length;
+
+            string block = text.Substring(startIndex, endIndex - startIndex);
+
+            string indented = IndentString + block.Replace(Environment.NewLine, Environment.NewLine + IndentString);
+
+            textBox.Text = string.Concat(text.AsSpan(0, startIndex), indented).TrimEnd();
+            textBox.Text += $"\n{text.Substring(endIndex).Trim()}";
+
+            textBox.SelectionStart = selectionStart + IndentString.Length;
+
+            textBox.SelectionLength = (indented.Length - IndentString.Length);
+        }
+
+        private void UnindentSelection(TextBox textBox)
+        {
+            string text = textBox.Text;
+
+            int selectionStart = textBox.SelectionStart;
+            int selectionLength = textBox.SelectionLength;
+
+            int firstLine = textBox.GetLineIndexFromCharacterIndex(selectionStart);
+
+            int lastChar = selectionLength > 0 ? selectionStart + selectionLength - 1 : selectionStart;
+
+            int lastLine = textBox.GetLineIndexFromCharacterIndex(lastChar);
+
+            int startIndex = textBox.GetCharacterIndexFromLineIndex(firstLine);
+
+            int endIndex = lastLine < textBox.LineCount - 1 ? textBox.GetCharacterIndexFromLineIndex(lastLine + 1) : text.Length;
+
+            string block = text.Substring(startIndex, endIndex - startIndex);
+
+            string[] lines = block.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+
+            int removedChars = 0;
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (lines[i].StartsWith(IndentString, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    lines[i] = lines[i].Substring(IndentString.Length);
+                    removedChars += IndentString.Length;
+                }
+                else if (lines[i].StartsWith("\t", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    lines[i] = lines[i].Substring(1);
+                    removedChars += 1;
+                }
+            }
+
+            string unindented = string.Join(Environment.NewLine, lines);
+
+            textBox.Text = string.Concat(text.AsSpan(0, startIndex), unindented, text.AsSpan(endIndex));
+
+            textBox.SelectionStart = Math.Max(startIndex, selectionStart - IndentString.Length);
+
+            textBox.SelectionLength = unindented.Length;
         }
 
         private void UpdateStatus()
